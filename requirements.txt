@@ -1,0 +1,10 @@
+Django # framework principale
+djangorestframework # simplifie la création d'API REST.
+django-cors-headers # gérer les problèmes de cross-origin resource sharing (CORS)
+django-filter # gérer les filtres dans vos API
+django-rest-swagger # Génère automatiquement une documentation interactive pour votre API basée sur les schémas DRF
+django-debug-toolbar # Utile pour le développement et le débogage
+django-rest-auth # si vous avez besoin d'authentification
+django-allauth
+django-simple-history
+psycopg2
