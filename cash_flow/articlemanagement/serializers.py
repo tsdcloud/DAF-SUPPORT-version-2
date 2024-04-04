@@ -1,13 +1,13 @@
-# depenses/serializers.py
+# Management article/serializers.py
 from rest_framework import serializers
 from .models import FamilyArticle, Article
+from common.constances import TypeProduit, Module
 
-#  FAMILY ARTICLE SERIALIZER
+# FAMILY ARTICLE SERIALIZERS
 class FamilyArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = FamilyArticle
         fields = '__all__'
-        
 
 class FamilyArticleCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -19,8 +19,7 @@ class FamilyArticleCreateSerializer(serializers.ModelSerializer):
             'site',
             'entite',
         ]
-             
-        
+
 class FamilyArticleListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = FamilyArticle
@@ -32,41 +31,37 @@ class FamilyArticleListingSerializer(serializers.ModelSerializer):
             'type_module',
             'site',
             'entite',
-            'date_init',
-            'active',
+            'time_created',
+            'is_active',
         ]
- 
- 
-# ARTICLE SERIALIZER       
+
+# ARTICLE SERIALIZERS
 class ArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = '__all__'
-        
+
 class ArticleCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = [
             'label',
             'sigle',
-            'type_module',
-            'site',
-            'entite',
+            'family_article_id',
+            'description',
         ]
-                    
+
 class ArticleListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Article
         fields = [
             'id',
             'num_ref',
+            'family_article_id',
             'label',
             'sigle',
-            'type_module',
-            'site',
-            'entite',
-            'date_init',
-            'active',
+            'description',
+            'time_created',
+            'create_by',
+            'is_active',
         ]
-        
-        

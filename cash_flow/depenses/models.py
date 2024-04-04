@@ -9,7 +9,7 @@ from django.core.mail import send_mail, send_mass_mail
 from datetime import datetime
 
 from django.db import DatabaseError, transaction
-from common.constances import ENDPOINT_ENTITY, ENDPOINT_USER,H_OPERATION_CHOICE,StatutExpenseSheet
+from common.constances import ENDPOINT_ENTITY, ENDPOINT_USER,H_OPERATION_CHOICE,StatutExpenseSheet, StatutReturnToCashier
 from common.middleware import generate_unique_num_ref
 
 from rest_framework.response import Response
@@ -63,7 +63,6 @@ class ExpenseSheet(BaseUUIDModel):
     entite = models.CharField(max_length=255)
     code_validation = models.CharField(max_length=255, null=True, blank=True)
     expiration_time = models.DateTimeField(null=True, blank=True)
-    # active = models.BooleanField(default=True)
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
     
@@ -268,3 +267,39 @@ class ExpenseSheet(BaseUUIDModel):
     def __str__(self):
         return self.num_ref
 
+
+
+class ReturnToCashier(BaseUUIDModel):
+    employer_initiateur = models.CharField(max_length=255)
+    remaining_amount = models.FloatField()
+    expense_sheet_id = models.ForeignKey(ExpenseSheet, on_delete=models.SET_NULL, null=True)
+    description = models.TextField()
+    num_ref = models.CharField(max_length=255, unique=True)
+    num_dossier = models.CharField(max_length=255, null=True, blank=True)
+    statut = models.CharField(
+        max_length=255,
+        choices=[(choice.value, choice.name) for choice in StatutExpenseSheet],
+        default=StatutReturnToCashier.VALIDATION_CAISSE.value
+    )
+    
+    employer_conformite = models.CharField(max_length=255)
+    employer_budgetaire = models.CharField(max_length=255)
+    employer_ordonnateur = models.CharField(max_length=255)
+    employer_caissier = models.CharField(max_length=255, null=True, blank=True)
+    montant = models.FloatField()
+    observation_conformite = models.TextField(null=True, blank=True)
+    observation_budgetaire = models.TextField(null=True, blank=True)
+    observation_ordonnateur = models.TextField(null=True, blank=True)
+
+    date_init = models.DateTimeField(auto_now_add=True)
+    date_valid_conformite = models.DateTimeField(null=True, blank=True)
+    date_valid_budgetaire = models.DateTimeField(null=True, blank=True)
+    date_valid_ordonnateur = models.DateTimeField(null=True, blank=True)
+    date_valid_decaissement = models.DateTimeField(null=True, blank=True)
+
+    site = models.CharField(max_length=255)
+    entite = models.CharField(max_length=255)
+    code_validation = models.CharField(max_length=255, null=True, blank=True)
+    expiration_time = models.DateTimeField(null=True, blank=True)
+    time_created = models.DateTimeField(auto_now_add=True)
+    time_updated = models.DateTimeField(auto_now=True)

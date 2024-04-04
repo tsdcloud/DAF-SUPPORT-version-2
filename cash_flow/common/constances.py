@@ -44,7 +44,11 @@ class StatutAvailabilityRequest(Enum):
     VALIDATION_COMPTABLE_MATIERE = 'VALIDATION COMPTABLE MATIERE'
     RECU = 'RECU'
 
-class TYpeProduit(Enum):
+class StatutReturnToCashier(Enum):
+    VALIDATION_CAISSE = 'VALIDATION CAISSE'
+    RECU = 'RECU'
+
+class TypeProduit(Enum):
     BIEN = 'BIEN'
     SERVICE = 'SERVICE'
 

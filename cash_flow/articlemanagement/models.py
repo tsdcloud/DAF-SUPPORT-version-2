@@ -14,24 +14,10 @@ from django.core.mail import send_mail, send_mass_mail
 from datetime import datetime
 
 from django.db import DatabaseError, transaction
-from common.constances import H_OPERATION_CHOICE,StatutAvailabilityReque, TYpeProduit, Module
+from common.constances import H_OPERATION_CHOICE,StatutAvailabilityRequest, TypeProduit, Module
 
 from rest_framework.response import Response
 from rest_framework import status
-
-# def generate_unique_num_ref():
-#     # NUM_REF peut être défini dynamiquement ou statiquement en fonction de vos besoins
-#     NUM_REF = 10001
-#     # Obtenez le mois/année actuel au format MM/YYYY
-#     codefin = datetime.now().strftime("%m/%Y")
-#     # Comptez le nombre d'objets avec une num_ref se terminant par le codefin actuel
-#     count = AvailabilityReque.objects.filter(num_ref__endswith=codefin).count()
-#     # Calculez le nouvel ID en ajoutant le nombre d'objets actuels à NUM_REF
-#     new_id = NUM_REF + count
-#     # Concaténez le nouvel ID avec le codefin pour former la nouvelle num_ref
-#     concatenated_num_ref = f"{new_id}/{codefin}"
-#     # concatenated_num_ref = str(new_id) + "/" + str(codefin) #f"{new_id}/{codefin}"
-#     return concatenated_num_ref
 
 
 # Create your Family Article here.
@@ -49,7 +35,6 @@ class FamilyArticle(BaseUUIDModel):
     create_by = models.CharField(max_length=255)
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
-    active = models.BooleanField(default=True)
     
     @classmethod
     def create_family_article(cls, user, 
@@ -62,7 +47,7 @@ class FamilyArticle(BaseUUIDModel):
             employer_initiateur (str): Employeur initiateur.
             ... # Inclure les autres paramètres
         Returns:
-            ExpenseSheet or None: La fiche de dépenses créée ou None en cas d'erreur.
+            FamilyArticle or None: La famille d'article créée ou None en cas d'erreur.
         """
         family_article = FamilyArticle()
 
@@ -80,7 +65,7 @@ class FamilyArticle(BaseUUIDModel):
                 family_article.save()
             return family_article
         except DatabaseError as e:
-            print(f"Error when creating the expense sheet : {e}")
+            print(f"Error when creating the family article sheet : {e}")
             return None
     
     def update_family_article(cls,family_article_id,  user, 
@@ -99,7 +84,6 @@ class FamilyArticle(BaseUUIDModel):
         family_article.type_module = type_module.upper()
         family_article.site = site
         family_article.entite = entite
-        family_article.num_ref = generate_unique_num_ref()
         try:
             with transaction.atomic():
                 family_article._change_reason = json.dumps({"reason": "UPDATED",
@@ -116,7 +100,7 @@ class FamilyArticle(BaseUUIDModel):
         
         try:
             with transaction.atomic():
-                family_article_instance = cls.objects.get(id = family_article_id)  # Remplacez ... par votre logique pour récupérer l'objet ExpenseSheet
+                family_article_instance = cls.objects.get(id = family_article_id)  # Remplacez ... par votre logique pour récupérer l'objet FamilyArticle
                 family_article_instance.is_active = False
                 family_article_instance._change_reason = json.dumps({"reason": "DELETE", "user": user})
                 family_article_instance.save()
@@ -129,11 +113,11 @@ class FamilyArticle(BaseUUIDModel):
     
     @classmethod
     def restore_family_article(cls, user: str, family_article_id: str):
-        """ Restore expense_sheet """
+        """ Restore family article """
         
         try:
             with transaction.atomic():
-                family_article_instance = cls.objects.get(id = family_article_id)  # Remplacez ... par votre logique pour récupérer l'objet ExpenseSheet
+                family_article_instance = cls.objects.get(id = family_article_id)  # Remplacez ... par votre logique pour récupérer l'objet FamilyArticle
                 family_article_instance.is_active = True
                 family_article_instance._change_reason = json.dumps({"reason": "RESTORE", "user": user})
                 family_article_instance.save()
@@ -172,7 +156,7 @@ class Article(BaseUUIDModel):
             employer_initiateur (str): Employeur initiateur.
             ... # Inclure les autres paramètres
         Returns:
-            ExpenseSheet or None: La fiche de dépenses créée ou None en cas d'erreur.
+            Article or None: article créée ou None en cas d'erreur.
         """
         article = Article()
 
@@ -201,14 +185,13 @@ class Article(BaseUUIDModel):
         Parameters:
             data (dict): Dictionnaire contenant les champs à mettre à jour.
         """
-        article = FamilyArticle.objects.get(id=article_id)
+        article = Article.objects.get(id=article_id)
         
         article.label = label
         article.sigle = sigle.upper()
         article.family_article_id = family_article_id
         article.sigle = sigle.upper()
         article.description = description.upper()
-        article.num_ref = generate_unique_num_ref()
         try:
             with transaction.atomic():
                 article._change_reason = json.dumps({"reason": "UPDATED",
@@ -225,7 +208,7 @@ class Article(BaseUUIDModel):
         
         try:
             with transaction.atomic():
-                article_instance = cls.objects.get(id = article_id)  # Remplacez ... par votre logique pour récupérer l'objet ExpenseSheet
+                article_instance = cls.objects.get(id = article_id)  # Remplacez ... par votre logique pour récupérer l'objet FamilyArticle
                 article_instance.is_active = False
                 article_instance._change_reason = json.dumps({"reason": "DELETE", "user": user})
                 article_instance.save()
@@ -238,11 +221,11 @@ class Article(BaseUUIDModel):
     
     @classmethod
     def restore_article(cls, user: str, article_id: str):
-        """ Restore expense_sheet """
+        """ Restore article """
         
         try:
             with transaction.atomic():
-                article_instance = cls.objects.get(id = article_id)  # Remplacez ... par votre logique pour récupérer l'objet ExpenseSheet
+                article_instance = cls.objects.get(id = article_id)  # Remplacez ... par votre logique pour récupérer l'objet Article
                 article_instance.is_active = True
                 article_instance._change_reason = json.dumps({"reason": "RESTORE", "user": user})
                 article_instance.save()

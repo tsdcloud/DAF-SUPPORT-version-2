@@ -11,7 +11,7 @@ from datetime import datetime
 
 from django.db import DatabaseError, transaction
 # from common.constances import H_OPERATION_CHOICE
-from common.constances import H_OPERATION_CHOICE,StatutAvailabilityRequest, TYpeProduit,ENDPOINT_ENTITY, ENDPOINT_USER
+from common.constances import H_OPERATION_CHOICE,StatutAvailabilityRequest, TypeProduit,ENDPOINT_ENTITY, ENDPOINT_USER
 
 from rest_framework.response import Response
 from rest_framework import status
@@ -48,7 +48,7 @@ class AvailabilityRequest(BaseUUIDModel):
     type_produit = models.CharField(
         max_length=255,
         choices=[(choice.value, choice.name) for choice in StatutAvailabilityRequest],
-        default=TYpeProduit.BIEN.value
+        default=TypeProduit.BIEN.value
     )
     num_dossier = models.CharField(max_length=255, null=True, blank=True)
     observation_controleur = models.TextField(null=True, blank=True)
@@ -265,7 +265,7 @@ class AvailabilityRequest(BaseUUIDModel):
 # Create your models here.
 class WordingAvailabilityRequest(BaseUUIDModel):
     num_ref = models.CharField(max_length=255, unique=True)
-    availability_requestst_id = models.ForeignKey(AvailabilityRequest, on_delete=models.SET_NULL)
+    availability_requestst_id = models.ForeignKey(AvailabilityRequest, on_delete=models.SET_NULL, null=True)
     beneficiary_id = models.CharField(max_length=255)
     designation = models.CharField(max_length=255)
     qantity = models.IntegerField()
@@ -344,7 +344,7 @@ class WordingAvailabilityRequest(BaseUUIDModel):
 # Create Attachement Availability Reque here.
 class AttachementAvailabilityRequest(BaseUUIDModel):
     num_ref = models.CharField(max_length=255, unique=True)
-    availability_requestst_id = models.ForeignKey(AvailabilityRequest, on_delete=models.SET_NULL)
+    availability_requestst_id = models.ForeignKey(AvailabilityRequest, on_delete=models.SET_NULL, null=True)
     filename = models.CharField(max_length=255)
     
     @classmethod

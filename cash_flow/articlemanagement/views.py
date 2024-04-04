@@ -29,7 +29,7 @@ class FamilyArticleViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return FamilyArticleListingSerializer
         if self.action == 'retrieve':
-            return FamilyArticleCreateSerializer
+            return FamilyArticleListingSerializer
         if self.action == 'update':
             return FamilyArticleCreateSerializer
         return FamilyArticleSerializer
@@ -113,7 +113,7 @@ class FamilyArticleViewSet(viewsets.ModelViewSet):
     
     def list(self, request, *args, **kwargs):
         """
-        This view intends to render all expenses sheets.
+        This view intends to render all family article sheets.
         :param request:
         :param args:
         :param kwargs:
@@ -121,11 +121,6 @@ class FamilyArticleViewSet(viewsets.ModelViewSet):
         """
         
         queryset = self.get_queryset()
-        # Ajout historique du listing
-        # if queryset:
-        #     FamilyArticle.create_histry_listing(
-        #                 user=request.infoUser.get('id')
-        #             )
             
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -133,7 +128,6 @@ class FamilyArticleViewSet(viewsets.ModelViewSet):
     
     def retrieve(self, request, pk=None,*args, **kwargs):
         """get an object"""
-        
         try:
             # Récupérer l'objet individuel de la base de données en utilisant l'identifiant fourni dans l'URL
             obj = self.get_object()
@@ -183,7 +177,7 @@ class FamilyArticleViewSet(viewsets.ModelViewSet):
             )
         else:
             return Response(
-                {"detail": "Error when creating expense sheet"},
+                {"detail": "Error when creating family article"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -228,7 +222,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return ArticleListingSerializer
         if self.action == 'retrieve':
-            return ArticleCreateSerializer
+            return ArticleListingSerializer
         if self.action == 'update':
             return ArticleCreateSerializer
         return ArticleSerializer
@@ -285,7 +279,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             try:
                 with transaction.atomic():
-                    family_article = Article.create_family_article(
+                    family_article = Article.create_article(
                         family_article_id=serializer.validated_data['family_article_id'],
                         label=serializer.validated_data['label'],
                         sigle=serializer.validated_data['sigle'],
@@ -311,7 +305,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
     
     def list(self, request, *args, **kwargs):
         """
-        This view intends to render all expenses sheets.
+        This view intends to render all article.
         :param request:
         :param args:
         :param kwargs:
@@ -360,7 +354,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
         if serializer.is_valid(raise_exception=True):
             try:
                 with transaction.atomic():
-                    family_article = Article.update_article(
+                    article = Article.update_article(
                         cls = self,
                         article_id = pk,
                         family_article_id=serializer.validated_data['family_article_id'],
@@ -370,11 +364,11 @@ class ArticleViewSet(viewsets.ModelViewSet):
                         user=request.infoUser.get('id')
                     )
             except DatabaseError:
-                family_article = None
+                article = None
 
             headers = self.get_success_headers(serializer.data)
             return Response(
-                FamilyArticleListingSerializer(family_article).data,
+                ArticleListingSerializer(article).data,
                 status=status.HTTP_200_OK,
                 headers=headers
             )
@@ -389,7 +383,7 @@ class ArticleViewSet(viewsets.ModelViewSet):
         """ Action pour supprimer un article """
         article = self.get_object()
         user_qs = request.infoUser.get('id')
-        article.delete_article(user=user_qs, articleid = pk)
+        article.delete_article(user=user_qs, article_id = pk)
         article = self.get_object()
         return Response(
             ArticleListingSerializer(
