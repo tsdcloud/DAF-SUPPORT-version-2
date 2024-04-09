@@ -196,8 +196,8 @@ class ExpenseSheet(BaseUUIDModel):
         
         
     @classmethod
-    def update_expense_sheet(cls, expense_sheet_id, employer_initiateur, employer_beneficiaire, employer_conformite, 
-                             employer_budgetaire, employer_ordonnateur, description, num_dossier, num_ref, 
+    def update_expense_sheet(cls, expense_sheet_id, employer_beneficiaire, employer_conformite, 
+                             employer_budgetaire, employer_ordonnateur, description, num_dossier, 
                              montant, site, entite, user):
         """
         Met à jour une fiche de dépenses avec les données fournies.
@@ -206,7 +206,7 @@ class ExpenseSheet(BaseUUIDModel):
             data (dict): Dictionnaire contenant les champs à mettre à jour.
         """
         expense_sheet = ExpenseSheet.objects.get(id=expense_sheet_id)
-        expense_sheet.employer_initiateur = employer_initiateur
+        # expense_sheet.employer_initiateur = employer_initiateur
         expense_sheet.employer_beneficiaire = employer_beneficiaire
         expense_sheet.employer_conformite = employer_conformite
         expense_sheet.employer_budgetaire = employer_budgetaire
@@ -216,7 +216,7 @@ class ExpenseSheet(BaseUUIDModel):
         expense_sheet.num_dossier = num_dossier
         expense_sheet.site = site
         expense_sheet.entite = entite
-        expense_sheet.num_ref = num_ref
+        # expense_sheet.num_ref = num_ref
         try:
             with transaction.atomic():
                 expense_sheet._change_reason = json.dumps({"reason": "UPDATED",

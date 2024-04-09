@@ -52,9 +52,29 @@ class TypeProduit(Enum):
     BIEN = 'BIEN'
     SERVICE = 'SERVICE'
 
+class Priorities(Enum):
+    WEAK = 1
+    MEDIUM = 2
+    HIGH = 3
+    
 class Module(Enum):
     DMD = 'DMD'
+    BON_SORTIE_MATERIEL = 'BON SORTIE MATERIEL'
+    DEPENSE = 'DEPENSE'
     RECETTE = 'RECETTE'
+    RETOUR_CAISSE = 'RETOUR CAISSE'
+    APPROVISIONNEMENT_CAISSE = 'APPROVISIONNEMENT CAISSE'
+
+class TransactionType(Enum):
+    CHECKIN = 'CHECKIN'
+    CHECKOUT = 'CHECKOUT'
+    
+    
+class TransactionStatus(Enum):
+    EXECUTED = 'EXECUTED'
+    NOT_EXECUTED = 'NOT EXECUTED'
+    
+
     
 
     

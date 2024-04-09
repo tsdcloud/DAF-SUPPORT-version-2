@@ -10,26 +10,11 @@ from django.core.mail import send_mail, send_mass_mail
 from datetime import datetime
 
 from django.db import DatabaseError, transaction
-# from common.constances import H_OPERATION_CHOICE
-from common.constances import H_OPERATION_CHOICE,StatutAvailabilityRequest, TypeProduit,ENDPOINT_ENTITY, ENDPOINT_USER
+from common.constances import H_OPERATION_CHOICE,StatutAvailabilityRequest, TypeProduit, Priorities, ENDPOINT_ENTITY, ENDPOINT_USER
 
 from rest_framework.response import Response
 from rest_framework import status
-# from .models import AvailabilityRequest
 
-# def generate_unique_num_ref():
-#     # NUM_REF peut être défini dynamiquement ou statiquement en fonction de vos besoins
-#     NUM_REF = 10001
-#     # Obtenez le mois/année actuel au format MM/YYYY
-#     codefin = datetime.now().strftime("%m/%Y")
-#     # Comptez le nombre d'objets avec une num_ref se terminant par le codefin actuel
-#     count = AvailabilityRequest.objects.filter(num_ref__endswith=codefin).count()
-#     # Calculez le nouvel ID en ajoutant le nombre d'objets actuels à NUM_REF
-#     new_id = NUM_REF + count
-#     # Concaténez le nouvel ID avec le codefin pour former la nouvelle num_ref
-#     concatenated_num_ref = f"{new_id}/{codefin}"
-#     # concatenated_num_ref = str(new_id) + "/" + str(codefin) #f"{new_id}/{codefin}"
-#     return concatenated_num_ref
 
 # Create your models here.
 class AvailabilityRequest(BaseUUIDModel):
@@ -47,9 +32,10 @@ class AvailabilityRequest(BaseUUIDModel):
     )
     type_produit = models.CharField(
         max_length=255,
-        choices=[(choice.value, choice.name) for choice in StatutAvailabilityRequest],
+        choices=[(choice.value, choice.name) for choice in TypeProduit],
         default=TypeProduit.BIEN.value
     )
+    priority = models.IntegerField(null=True, blank=True, choices=[(level.value, level.name) for level in Priorities])
     num_dossier = models.CharField(max_length=255, null=True, blank=True)
     observation_controleur = models.TextField(null=True, blank=True)
     observation_ordonnateur = models.TextField(null=True, blank=True)
@@ -61,7 +47,6 @@ class AvailabilityRequest(BaseUUIDModel):
     site = models.CharField(max_length=255)
     entite = models.CharField(max_length=255)
 
-    # active = models.BooleanField(default=True)
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
     
@@ -91,7 +76,6 @@ class AvailabilityRequest(BaseUUIDModel):
         availability_request.site = site
         availability_request.entite = entite
         availability_request.num_ref = generate_unique_num_ref(AvailabilityRequest)
-        # availability_request.num_ref = generate_unique_num_ref()
 
         try:
             with transaction.atomic():
@@ -105,7 +89,7 @@ class AvailabilityRequest(BaseUUIDModel):
         
     
     @classmethod
-    def validate_availability_request(cls, availability_request_id, description, user):
+    def validate_availability_request(cls, availability_request_id, description, user, priority = None):
         try:
             availability_request = cls.objects.get(id=availability_request_id)
         except cls.DoesNotExist:
@@ -115,19 +99,22 @@ class AvailabilityRequest(BaseUUIDModel):
             return Response({"detail": "Missing user or observation in request data"}, status=status.HTTP_400_BAD_REQUEST)
 
         if availability_request.employer_controleur == user and availability_request.statut == 'VALIDATION CONTROLEUR':
-            # validation conformity
-            availability_request.observation_controleur = description
+            # validation controller
+            availability_request.observation_controleur = description    
             availability_request.statut = 'VALIDATION ORDONNATEUR'
             availability_request.date_valid_controleur = datetime.now()
 
         elif availability_request.employer_ordonnateur == user and availability_request.statut == 'VALIDATION ORDONNATEUR':
             # validation authorizing officer
             availability_request.observation_ordonnateur = description
+            if priority:
+                availability_request.priority = priority
             availability_request.statut = 'VALIDATION COMPTABLE MATIERE'
             availability_request.date_valid_ordonnateur = datetime.now()
 
-        elif availability_request.employer_budgetaire == user and availability_request.statut == 'VALIDATION COMPTABLE MATIERE':
-            # validation budgetary
+        elif description == "is_compta_mat" and availability_request.statut == 'VALIDATION COMPTABLE MATIERE':
+            # validation copta-mat
+            availability_request.employer_compta_mat = user
             availability_request.statut = 'RECU'
             availability_request.date_valid_compta_mat = datetime.now()
 
@@ -201,12 +188,11 @@ class AvailabilityRequest(BaseUUIDModel):
         availability_request = AvailabilityRequest.objects.get(id=availability_request_id)
         if availability_request.statut != 'VALIDATION CONTROLEUR':
             return None
-        # availability_request.employer_initiateur = employer_initiateur
         availability_request.employer_controleur = employer_controleur
         availability_request.employer_ordonnateur = employer_ordonnateur
         availability_request.requesting_service = requesting_service
-        availability_request.type_produit = type_produit
         availability_request.description = description.upper()
+        availability_request.type_produit = type_produit
         availability_request.num_dossier = num_dossier
         availability_request.site = site
         availability_request.entite = entite
@@ -295,7 +281,6 @@ class WordingAvailabilityRequest(BaseUUIDModel):
         wording_availability_request.date_use_start = date_use_start
         wording_availability_request.quantity_rewind = quantity_rewind
         wording_availability_request.num_ref = generate_unique_num_ref(WordingAvailabilityRequest)
-        # availability_request.num_ref = generate_unique_num_ref()
 
         try:
             with transaction.atomic():
@@ -336,6 +321,42 @@ class WordingAvailabilityRequest(BaseUUIDModel):
             print(f"Error while updating the expense sheet : {e}")
             return None   
 
+    @classmethod
+    def delete_wording_availability_request(cls, user: str, wording_availability_request_id: str):
+        """ delete availability_request """
+        
+        try:
+            with transaction.atomic():
+                availability_request_instance = cls.objects.get(id = wording_availability_request_id)  # Remplacez ... par votre logique pour récupérer l'objet AvailabilityRequest
+                availability_request_instance.is_active = False
+                availability_request_instance._change_reason = json.dumps({"reason": "DELETE", "user": user})
+                availability_request_instance.save()
+
+            return availability_request_instance
+        except cls.DoesNotExist:
+            return None
+        except DatabaseError:
+            return None
+        
+        
+    @classmethod
+    def restore_wording_availability_request(cls, user: str, wording_availability_request_id: str):
+        """ Restore availability_request """
+        
+        try:
+            with transaction.atomic():
+                availability_request_instance = cls.objects.get(id = wording_availability_request_id)  # Remplacez ... par votre logique pour récupérer l'objet AvailabilityRequest
+                availability_request_instance.is_active = True
+                availability_request_instance._change_reason = json.dumps({"reason": "RESTORE", "user": user})
+                availability_request_instance.save()
+                
+            return availability_request_instance
+        except cls.DoesNotExist:
+            return None
+        except DatabaseError:
+            return None
+        
+        
     def __str__(self):
         return self.num_ref
 

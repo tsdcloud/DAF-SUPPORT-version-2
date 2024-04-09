@@ -28,6 +28,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from depenses.views import ExpenseSheetViewSet
 from articlemanagement.views import FamilyArticleViewSet, ArticleViewSet
+from availabilityrequest.views import AvailabilityRequestViewSet, WordingAvailabilityRequestViewSet
 
 
 router = OptionalSlashRouter()
@@ -35,11 +36,11 @@ router = OptionalSlashRouter()
 router.register(r'expensesheet', ExpenseSheetViewSet, basename='expensesheet')
 router.register(r'familyarticle', FamilyArticleViewSet, basename='familyarticle')
 router.register(r'article', ArticleViewSet, basename='article')
+router.register(r'availabilityrequest', AvailabilityRequestViewSet, basename='availabilityrequest')
+router.register(r'wordingavailabilityrequest', WordingAvailabilityRequestViewSet, basename='wordingavailabilityrequest')
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls)),
-    # Ajoutez le chemin pour l'action rejection
-    # path('expensesheet/<str:pk>/rejection/', ExpenseSheetViewSet.as_view({'patch': 'rejection'}), name='expensesheet-rejection'),
+    path('', include(router.urls))
 ]
 
 # ajoutéer l'url de débug

@@ -187,18 +187,13 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
 
     def update(self, request, pk=None, *args, **kwargs):
         # Logique pour mettre à jour un objet complet
-        print("ok")
         serializer = self.get_serializer(data=self.request.data)
         
-       
-        # if serializer.is_valid():
         if serializer.is_valid(raise_exception=True):
             try:
                 with transaction.atomic():
                     expense_sheet = ExpenseSheet.update_expense_sheet(
-                        cls = self,
                         expense_sheet_id = pk,
-                        employer_initiateur=request.infoUser.get('id'),
                         employer_beneficiaire=serializer.validated_data['employer_beneficiaire'],
                         employer_conformite=serializer.validated_data['employer_conformite'],
                         employer_budgetaire=serializer.validated_data['employer_budgetaire'],
@@ -228,7 +223,6 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
     
     def partial_update(self, request, pk=None, *args, **kwargs):
         # Logique pour mettre à jour un objet complet
-        print("ok validation")
         serializer = self.get_serializer(data=self.request.data)
         
         if serializer.is_valid(raise_exception=True):
