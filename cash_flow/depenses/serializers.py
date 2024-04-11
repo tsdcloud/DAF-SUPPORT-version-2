@@ -1,6 +1,7 @@
 # depenses/serializers.py
 from rest_framework import serializers
 from .models import ExpenseSheet
+from common.constances import PaymentMethods
 
 class ExpenseSheetSerializer(serializers.ModelSerializer):
     class Meta:
@@ -9,6 +10,9 @@ class ExpenseSheetSerializer(serializers.ModelSerializer):
         
 
 class ExpenseSheetBaseSerializer(serializers.ModelSerializer):
+    # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
+    payment_method = serializers.ChoiceField(choices=[(payment.value, payment.name) for payment in PaymentMethods])
+    num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
     class Meta:
         model = ExpenseSheet
         fields = [
@@ -16,14 +20,17 @@ class ExpenseSheetBaseSerializer(serializers.ModelSerializer):
             'employer_beneficiaire',
             'description',
             'montant',
+            'payment_method',
             'num_dossier',
             'site',
             'entite',
         ]
-        # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
-        num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
+        
         
 class ExpenseSheetCreateSerializer(serializers.ModelSerializer):
+    # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
+    payment_method = serializers.ChoiceField(choices=[(payment.value, payment.name) for payment in PaymentMethods])
+    num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
     class Meta:
         model = ExpenseSheet
         fields = [
@@ -31,6 +38,7 @@ class ExpenseSheetCreateSerializer(serializers.ModelSerializer):
             'employer_beneficiaire',
             'description',
             'montant',
+            'payment_method',
             'num_dossier',
             'employer_conformite',
             'employer_budgetaire',
@@ -38,11 +46,13 @@ class ExpenseSheetCreateSerializer(serializers.ModelSerializer):
             'site',
             'entite',
         ]
-        # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
-        num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
+        
         
         
 class ExpenseSheetListingSerializer(serializers.ModelSerializer):
+    # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
+    payment_method = serializers.ChoiceField(choices=[(payment.value, payment.name) for payment in PaymentMethods])
+    num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
     class Meta:
         model = ExpenseSheet
         fields = [
@@ -53,16 +63,23 @@ class ExpenseSheetListingSerializer(serializers.ModelSerializer):
             'employer_beneficiaire',
             'description',
             'montant',
+            'payment_method',
             'num_dossier',
             'date_init',
             'site',
             'entite',
             'is_active',
         ]
-        # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
-        num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
+        
         
 class ExpenseSheetDetailSerializer(serializers.ModelSerializer):
+    # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
+    payment_method = serializers.ChoiceField(choices=[(payment.value, payment.name) for payment in PaymentMethods])
+    num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    observation_conformite = serializers.CharField(required=False, allow_blank=True)
+    observation_budgetaire = serializers.CharField(required=False, allow_blank=True)
+    observation_ordonnateur = serializers.CharField(required=False, allow_blank=True)
+    employer_caissier = serializers.CharField(max_length=255, required=False, allow_blank=True)
     class Meta:
         model = ExpenseSheet
         fields = [
@@ -73,6 +90,7 @@ class ExpenseSheetDetailSerializer(serializers.ModelSerializer):
             'employer_beneficiaire',
             'description',
             'montant',
+            'payment_method',
             'num_dossier',
             'employer_budgetaire',
             'employer_ordonnateur',
@@ -88,12 +106,7 @@ class ExpenseSheetDetailSerializer(serializers.ModelSerializer):
             'date_init',
             'is_active',
         ]
-        # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
-        num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
-        observation_conformite = serializers.CharField(required=False, allow_blank=True)
-        observation_budgetaire = serializers.CharField(required=False, allow_blank=True)
-        observation_ordonnateur = serializers.CharField(required=False, allow_blank=True)
-        employer_caissier = serializers.CharField(max_length=255, required=False, allow_blank=True)
+        
 
 class ExpenseSheetValidationSerializer(serializers.ModelSerializer):
     class Meta:

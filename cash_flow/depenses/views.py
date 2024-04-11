@@ -82,7 +82,6 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         """ define object on detail url """
-        print("ok2")
         queryset = self.get_queryset()
         try:
             obj = get_object_or_404(queryset, id=self.kwargs["pk"])
@@ -108,6 +107,7 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
                         description=serializer.validated_data['description'],
                         num_dossier=serializer.validated_data['num_dossier'],
                         montant=serializer.validated_data['montant'],
+                        payment_method=serializer.validated_data['payment_method'],
                         site=serializer.validated_data['site'],
                         entite=serializer.validated_data['entite'],
                         user=request.infoUser.get('id')
@@ -201,6 +201,7 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
                         description=serializer.validated_data['description'],
                         num_dossier=serializer.validated_data['num_dossier'],
                         montant=serializer.validated_data['montant'],
+                        payment_method=serializer.validated_data['payment_method'],
                         site=serializer.validated_data['site'],
                         entite=serializer.validated_data['entite'],
                         user=request.infoUser.get('id')

@@ -34,8 +34,19 @@ class StatutExpenseSheet(Enum):
     REJET_ORDONNATEUR = 'REJET ORDONNATEUR'
     VALIDATION_DECAISSEMENT = 'VALIDATION DECAISSEMENT'
     REJET = 'REJET'
+    EN_EXECUTION ='EN EXECUTION'
     ARCHIVE ='ARCHIVE'
+class PaymentMethods(Enum):
+    ESPECES = 'ESPECES'
+    CARTE = 'CARTE'
+    VIREMENT = 'VIREMENT'
+    CHEQUE = 'CHEQUE'
+    PAIMENT_MOBILE = 'PAIMENT MOBILE'
+    CRYPTO_MONAIE = 'REJET ORDONNATEUR'
+    PORTE_MONAIE_ELECTRONIQUE = 'PORTE MONAIE ELECTRONIQUE'
 
+
+# DMD constances
 class StatutAvailabilityRequest(Enum):
     VALIDATION_CONTROLEUR = 'VALIDATION CONTROLEUR'
     REJET_CONTROLEUR = 'REJET CONTROLEUR'
@@ -56,7 +67,8 @@ class Priorities(Enum):
     WEAK = 1
     MEDIUM = 2
     HIGH = 3
-    
+
+# gestion des modules    
 class Module(Enum):
     DMD = 'DMD'
     BON_SORTIE_MATERIEL = 'BON SORTIE MATERIEL'
