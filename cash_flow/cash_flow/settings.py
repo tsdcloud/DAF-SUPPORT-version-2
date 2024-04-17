@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'depenses',
     'articlemanagement',
     'availabilityrequest',
+    'cash_management',
 ]
 
 MIDDLEWARE = [

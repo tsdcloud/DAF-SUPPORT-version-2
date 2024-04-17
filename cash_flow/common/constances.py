@@ -35,7 +35,8 @@ class StatutExpenseSheet(Enum):
     VALIDATION_DECAISSEMENT = 'VALIDATION DECAISSEMENT'
     REJET = 'REJET'
     EN_EXECUTION ='EN EXECUTION'
-    ARCHIVE ='ARCHIVE'
+    ARCHIVE ='EXECUTE'
+
 class PaymentMethods(Enum):
     ESPECES = 'ESPECES'
     CARTE = 'CARTE'
@@ -80,11 +81,15 @@ class Module(Enum):
 class TransactionType(Enum):
     CHECKIN = 'CHECKIN'
     CHECKOUT = 'CHECKOUT'
+
+class TypeCashRegisterAction(Enum):
+    OPENING = 'OPENING'
+    CLOSING = 'CLOSING'
     
     
 class TransactionStatus(Enum):
-    EXECUTED = 'EXECUTED'
     NOT_EXECUTED = 'NOT EXECUTED'
+    EXECUTED = 'EXECUTED'
     
 
     

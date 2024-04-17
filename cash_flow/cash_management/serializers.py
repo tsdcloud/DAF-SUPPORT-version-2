@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import CashTransaction, WordingCashTransaction
+from cash_management.models import CashTransaction
+# WordingCashTransaction,
+#                      CashRegister, Currency, Denomination)
 
 class CashTransactionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,107 +10,107 @@ class CashTransactionSerializer(serializers.ModelSerializer):
         
 
 class CashTransactionBaseSerializer(serializers.ModelSerializer):
+    # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
+    num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    employer_beneficiaire = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
+    
     class Meta:
         model = CashTransaction
         fields = [
-            'cashier_id',
             'employer_initiateur',
+            'cashier_id',
             'montant',
             'transaction_type',
             'module',
             'item_id',
             'num_dossier',
             'employer_beneficiaire',
-            'code_validation',
             'date_valid_beneficiaire',
             'site',
             'entite',
         ]
-        # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
-        num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
-        employer_beneficiaire = serializers.CharField(max_length=255, required=False, allow_blank=True)
-        code_validation = serializers.IntegerField(max_length=4, null=True, blank=True)
-        date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
+        
         
         
 class CashTransactionCreateSerializer(serializers.ModelSerializer):
+    # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
+    num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    employer_beneficiaire = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    # date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
+    
     class Meta:
         model = CashTransaction
         fields = [
+            'employer_beneficiaire',
             'cashier_id',
-            'employer_initiateur',
             'montant',
             'transaction_type',
             'module',
             'item_id',
             'num_dossier',
-            'employer_beneficiaire',
-            'code_validation',
-            'date_valid_beneficiaire',
+            'description',
             'site',
             'entite',
         ]
-        # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
-        num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
-        employer_beneficiaire = serializers.CharField(max_length=255, required=False, allow_blank=True)
-        code_validation = serializers.IntegerField(max_length=4, null=True, blank=True)
-        date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
+    
         
         
 class CashTransactionListingSerializer(serializers.ModelSerializer):
+    # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
+    num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    employer_beneficiaire = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
     class Meta:
         model = CashTransaction
         fields = [
             'id',
             'num_ref',
-            'statut',
-            'cashier_id',
+            'status',
             'employer_initiateur',
+            'employer_beneficiaire',
+            'date_valid_beneficiaire',
+            'cashier_id',
             'montant',
             'transaction_type',
             'module',
             'item_id',
             'num_dossier',
-            'employer_beneficiaire',
-            'code_validation',
-            'date_valid_beneficiaire',
+            'description',
             'site',
             'entite',
             'is_active',
         ]
-        # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
-        num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
-        employer_beneficiaire = serializers.CharField(max_length=255, required=False, allow_blank=True)
-        code_validation = serializers.IntegerField(max_length=4, null=True, blank=True)
-        date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
+        
         
 class CashTransactionDetailSerializer(serializers.ModelSerializer):
+    # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
+    num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    employer_beneficiaire = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
+
     class Meta:
         model = CashTransaction
         fields = [
             'id',
             'num_ref',
-            'statut',
-            'cashier_id',
+            'status',
             'employer_initiateur',
+            'employer_beneficiaire',
+            'date_valid_beneficiaire',
+            'cashier_id',
             'montant',
             'transaction_type',
             'module',
             'item_id',
             'num_dossier',
-            'employer_beneficiaire',
-            'code_validation',
-            'date_valid_beneficiaire',
+            'description',
             'site',
             'entite',
             'time_created',
             'is_active',
         ]
-        # Vous pouvez rendre des champs spécifiques optionnels en ajustant les paramètres suivants :
-        num_dossier = serializers.CharField(max_length=50, required=False, allow_blank=True)
-        employer_beneficiaire = serializers.CharField(max_length=255, required=False, allow_blank=True)
-        code_validation = serializers.IntegerField(max_length=4, null=True, blank=True)
-        date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
+        
 
 class CashTransactionValidationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -116,42 +118,53 @@ class CashTransactionValidationSerializer(serializers.ModelSerializer):
         fields = [
             'code_validation',
         ]
+    
+    def validate_code_validation(self, value):
+        if not value.isdigit() or len(value) != 4:
+            raise serializers.ValidationError("Le code de validation doit être exactement 4 chiffres")
+        return value
         
            
 
 class CashTransactionValidationCodeSerializer(serializers.ModelSerializer):
     class Meta:
-        code = serializers.CharField(max_length=4)
+        model = CashTransaction
+        fields = [
+            'code_validation',
+        ]
+    
+    def validate_code_validation(self, value):
+        if not value.isdigit() or len(value) != 4:
+            raise serializers.ValidationError("Le code de validation doit être exactement 4 chiffres")
+        return value
+    
+class CashTransactionGenerateCodeSerializer(serializers.ModelSerializer):
+    date_valid_beneficiaire = serializers.DateTimeField(allow_null=True, required=False)
+    class Meta:
+        model = CashTransaction
+        fields = [
+            'date_valid_beneficiaire',
+        ]
 
 
 
 # Wording Availability Request SERIALIZERS
-class WordingCashTransactionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WordingCashTransaction
-        fields = '__all__'
+# Serializers define the API representation.
+# class DenominationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Denomination
+#         fields = ['value', 'count']
 
-class WordingCashTransactionCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WordingCashTransaction
-        fields = [
-            'label',
-            'sigle',
-            'family_article_id',
-            'description',
-        ]
+# class CurrencySerializer(serializers.ModelSerializer):
+#     denominations = DenominationSerializer(many=True, read_only=True)
 
-class WordingCashTransactionListingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = WordingCashTransaction
-        fields = [
-            'id',
-            'num_ref',
-            'family_article_id',
-            'label',
-            'sigle',
-            'description',
-            'time_created',
-            'create_by',
-            'is_active',
-        ]
+#     class Meta:
+#         model = Currency
+#         fields = ['name', 'denominations']
+
+# class CashRegisterSerializer(serializers.ModelSerializer):
+#     currencies = CurrencySerializer(many=True, read_only=True)
+
+#     class Meta:
+#         model = CashRegister
+#         fields = ['currencies']

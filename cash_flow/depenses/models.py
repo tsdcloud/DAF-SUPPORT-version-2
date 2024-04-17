@@ -252,6 +252,35 @@ class ExpenseSheet(BaseUUIDModel):
             return None
         
 
+    @classmethod
+    def execute_expense_sheet(cls, expense_sheet_id, user):
+        """
+        Met à jour une fiche de dépenses avec les données fournies.
+        
+        Parameters:
+            data (dict): Dictionnaire contenant les champs à mettre à jour.
+        """
+        expense_sheet = ExpenseSheet.objects.get(id=expense_sheet_id)
+        expense_sheet.statut = 'EXECUTE'
+        try:
+            with transaction.atomic():
+                expense_sheet._change_reason = json.dumps({"reason": "EXECUTION",
+                                                        "user": user})
+                expense_sheet.save()
+            return expense_sheet
+        except DatabaseError as e:
+            print(f"Error while execution the expense sheet : {e}")
+            return None
+        
+    @classmethod
+    def check_expense_sheet(cls, expense_sheet_id):
+        try:
+            expense_sheet = cls.objects.get(id=expense_sheet_id)
+            return True
+        except cls.DoesNotExist:
+            return False
+        
+        
     def __str__(self):
         return self.num_ref
 
@@ -291,3 +320,5 @@ class ReturnToCashier(BaseUUIDModel):
     expiration_time = models.DateTimeField(null=True, blank=True)
     time_created = models.DateTimeField(auto_now_add=True)
     time_updated = models.DateTimeField(auto_now=True)
+    
+    
