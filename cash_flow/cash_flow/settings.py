@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rest_auth',
     'common',
     'depenses',
+    'return_to_cashier',
     'articlemanagement',
     'availabilityrequest',
     'cash_management',

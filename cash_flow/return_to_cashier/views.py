@@ -1,3 +1,4 @@
+from django.shortcuts import render
 # depenses/views.py
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -10,56 +11,56 @@ from django.http import Http404
 from rest_framework.decorators import action
 from datetime import datetime
 
-from depenses.models import ExpenseSheet
-from depenses.serializers import (ExpenseSheetSerializer, ExpenseSheetCreateSerializer,
-                                  ExpenseSheetListingSerializer, ExpenseSheetDetailSerializer,
-                                  ExpenseSheetValidationSerializer, ExpenseSheetValidationCodeSerializer)
+from return_to_cashier.models import ReturnToCashier
+from return_to_cashier.serializers import (ReturnToCashierSerializer, ReturnToCashierCreateSerializer,
+                                  ReturnToCashierListingSerializer, ReturnToCashierDetailSerializer,
+                                  ReturnToCashierValidationSerializer, ReturnToCashierValidationCodeSerializer)
 from common.permissions import IsDeactivate, IsActivate
-from depenses .permissions import (IsAddExpenseSheet, IsChangeExpenseSheet,
-                                   IsDestroyExpenseSheet, IsRestoreExpenseSheet,
-                                   IsViewDetailExpenseSheet, IsViewAllExpenseSheet,
-                                   IsValidateExpenseSheet, IsRejecteExpenseSheet)
+from return_to_cashier .permissions import (IsAddReturnToCashier, IsChangeReturnToCashier,
+                                   IsDestroyReturnToCashier, IsRestoreReturnToCashier,
+                                   IsViewDetailReturnToCashier, IsViewAllReturnToCashier,
+                                   IsValidateReturnToCashier, IsRejecteReturnToCashier)
 
-class ExpenseSheetViewSet(viewsets.ModelViewSet):
-    # queryset = ExpenseSheet.objects.all()
+class ReturnToCashierViewSet(viewsets.ModelViewSet):
+    # queryset = ReturnToCashier.objects.all()
 
     def get_serializer_class(self):
         if self.action == 'create':
-            return ExpenseSheetCreateSerializer
+            return ReturnToCashierCreateSerializer
         if self.action == 'list':
-            return ExpenseSheetListingSerializer
+            return ReturnToCashierListingSerializer
         if self.action == 'retrieve':
-            return ExpenseSheetDetailSerializer
+            return ReturnToCashierDetailSerializer
         if self.action == 'update':
-            return ExpenseSheetCreateSerializer
+            return ReturnToCashierCreateSerializer
         if self.action == 'partial_update':
             print("partial_update")
-            return ExpenseSheetValidationSerializer
+            return ReturnToCashierValidationSerializer
         if self.action == 'code_validation':
-            return ExpenseSheetValidationCodeSerializer
-        return ExpenseSheetSerializer
+            return ReturnToCashierValidationCodeSerializer
+        return ReturnToCashierSerializer
     
     
     def get_permissions(self):
         """ define permissions """
         if self.action == 'create':
-            self.permission_classes = [IsAddExpenseSheet]
+            self.permission_classes = [IsAddReturnToCashier]
         elif self.action == 'list':
-            self.permission_classes = [IsViewAllExpenseSheet]
+            self.permission_classes = [IsViewAllReturnToCashier]
         elif self.action == 'retrieve':
-            self.permission_classes = [IsViewDetailExpenseSheet]
+            self.permission_classes = [IsViewDetailReturnToCashier]
         elif self.action == 'update':
-            self.permission_classes = [IsChangeExpenseSheet]
+            self.permission_classes = [IsChangeReturnToCashier]
         elif self.action in ['partial_update', "rejection"]:
-            self.permission_classes = [IsValidateExpenseSheet]
+            self.permission_classes = [IsValidateReturnToCashier]
         elif self.action == 'partial_update':
-            self.permission_classes = [IsValidateExpenseSheet]
+            self.permission_classes = [IsValidateReturnToCashier]
         elif self.action == 'rejection':
-            self.permission_classes = [IsRejecteExpenseSheet]
+            self.permission_classes = [IsRejecteReturnToCashier]
         elif self.action == 'destroy':
-            self.permission_classes = [IsDestroyExpenseSheet]
+            self.permission_classes = [IsDestroyReturnToCashier]
         elif self.action == 'restore':
-            self.permission_classes = [IsRestoreExpenseSheet]
+            self.permission_classes = [IsRestoreReturnToCashier]
         else:
             self.permission_classes = [IsDeactivate]
             # self.permission_classes = [IsActivate]
@@ -71,12 +72,12 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
         # Remplacez votre code actuel à la ligne 65 dans views.py par le suivant
         if self.request.infoUser and 'member' in self.request.infoUser and 'is_superuser' in self.request.infoUser['member']:
             if self.request.infoUser['member']['is_superuser'] is True:
-                queryset = ExpenseSheet.objects.all()
+                queryset = ReturnToCashier.objects.all()
             else:
-                queryset = ExpenseSheet.objects.filter(is_active=True)
+                queryset = ReturnToCashier.objects.filter(is_active=True)
         else:
             # Gérez le cas où self.request.infoUser est None ou ne contient pas les clés attendues
-            queryset = ExpenseSheet.objects.filter(is_active=True)
+            queryset = ReturnToCashier.objects.filter(is_active=True)
         return queryset
 
 
@@ -98,39 +99,36 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             try:
                 with transaction.atomic():
-                    expense_sheet = ExpenseSheet.create_expense_sheet(
-                        # employer_initiateur=serializer.validated_data['employer_initiateur'],
-                        employer_beneficiaire=serializer.validated_data['employer_beneficiaire'],
-                        employer_conformite=serializer.validated_data['employer_conformite'],
-                        employer_budgetaire=serializer.validated_data['employer_budgetaire'],
-                        employer_ordonnateur=serializer.validated_data['employer_ordonnateur'],
+                    return_to_cashier = ReturnToCashier.create_return_to_cashier(
+                        
+                        expense_sheet_id=serializer.validated_data['expense_sheet_id'],
+                        remaining_balance=serializer.validated_data['remaining_balance'],
                         description=serializer.validated_data['description'],
-                        num_dossier=serializer.validated_data['num_dossier'],
-                        montant=serializer.validated_data['montant'],
                         payment_method=serializer.validated_data['payment_method'],
+                        num_dossier=serializer.validated_data['num_dossier'],
                         site=serializer.validated_data['site'],
                         entite=serializer.validated_data['entite'],
                         user=request.infoUser.get('id')
                     )
             except DatabaseError:
-                expense_sheet = None
+                return_to_cashier = None
 
             headers = self.get_success_headers(serializer.data)
             # email
-            addressee = get_email_addressee(expense_sheet.employer_conformite)
+            addressee = get_email_addressee(return_to_cashier.employer_conformite)
             addressee = serializer.validated_data['employer_conformite']
             print(addressee)
             addressee = get_email_addressee(addressee)
             addressee = get_email_addressee(serializer.validated_data['employer_conformite'])
             addressee = [addressee]
             # send_email(
-            #     subject = f"Creation de fiche de dépense numéro: {expense_sheet.num_ref}",
+            #     subject = f"Creation de fiche de dépense numéro: {return_to_cashier.num_ref}",
             #     message = f"L'employé {request.infoUser.get('last_name')} { request.infoUser.get('first_name')}  
-            #                 une fiche importante qui nécessite votre validation. Pour procéder, veuillez suivre le lien http://bfclimited.com /{expense_sheet.id}.Merci" ,
+            #                 une fiche importante qui nécessite votre validation. Pour procéder, veuillez suivre le lien http://bfclimited.com /{return_to_cashier.id}.Merci" ,
             #     recipient_list = addressee
             # )
             return Response(
-                ExpenseSheetListingSerializer(expense_sheet).data,
+                ReturnToCashierListingSerializer(return_to_cashier).data,
                 status=status.HTTP_201_CREATED,
                 headers=headers
             )
@@ -153,7 +151,7 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         # Ajout historique du listing
         # if queryset:
-        #     ExpenseSheet.create_histry_listing(
+        #     ReturnToCashier.create_histry_listing(
         #                 user=request.infoUser.get('id')
         #             )
             
@@ -190,26 +188,23 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
         if serializer.is_valid(raise_exception=True):
             try:
                 with transaction.atomic():
-                    expense_sheet = ExpenseSheet.update_expense_sheet(
-                        expense_sheet_id = pk,
-                        employer_beneficiaire=serializer.validated_data['employer_beneficiaire'],
-                        employer_conformite=serializer.validated_data['employer_conformite'],
-                        employer_budgetaire=serializer.validated_data['employer_budgetaire'],
-                        employer_ordonnateur=serializer.validated_data['employer_ordonnateur'],
+                    return_to_cashier = ReturnToCashier.update_return_to_cashier(
+                        return_to_cashier_id = pk,
+                        expense_sheet_id=serializer.validated_data['expense_sheet_id'],
+                        remaining_balance=serializer.validated_data['remaining_balance'],
                         description=serializer.validated_data['description'],
-                        num_dossier=serializer.validated_data['num_dossier'],
-                        montant=serializer.validated_data['montant'],
                         payment_method=serializer.validated_data['payment_method'],
+                        num_dossier=serializer.validated_data['num_dossier'],
                         site=serializer.validated_data['site'],
                         entite=serializer.validated_data['entite'],
                         user=request.infoUser.get('id')
                     )
             except DatabaseError:
-                expense_sheet = None
+                return_to_cashier = None
 
             headers = self.get_success_headers(serializer.data)
             return Response(
-                ExpenseSheetDetailSerializer(expense_sheet).data,
+                ReturnToCashierDetailSerializer(return_to_cashier).data,
                 status=status.HTTP_200_OK,
                 headers=headers
             )
@@ -227,20 +222,20 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
         if serializer.is_valid(raise_exception=True):
             try:
                 with transaction.atomic():
-                    expense_sheet = ExpenseSheet.validate_expense_sheet(
-                        expense_sheet_id=pk,
+                    return_to_cashier = ReturnToCashier.validate_return_to_cashier(
+                        return_to_cashier_id=pk,
                         observation=serializer.validated_data['description'],
                         user=request.infoUser.get('id')
                     )
             except DatabaseError as e:
                 print(f"Database error during update: {e}")
-                expense_sheet = None
+                return_to_cashier = None
 
-            if expense_sheet:
-                expense_sheet = self.get_object()
+            if return_to_cashier:
+                return_to_cashier = self.get_object()
                 return Response(
-                    # expense_sheet.data,
-                    ExpenseSheetDetailSerializer(expense_sheet).data,
+                    # return_to_cashier.data,
+                    ReturnToCashierDetailSerializer(return_to_cashier).data,
                     status=status.HTTP_200_OK
                 )
             else:
@@ -259,25 +254,25 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'])
     def rejection(self, request, pk=None, *args, **kwargs):
         # Logique pour mettre à jour un objet complet
-        serializer = ExpenseSheetValidationSerializer(data=self.request.data)
+        serializer = ReturnToCashierValidationSerializer(data=self.request.data)
         
         if serializer.is_valid(raise_exception=True):
             try:
                 with transaction.atomic():
-                    expense_sheet = ExpenseSheet.rejection_expense_sheet(
-                        expense_sheet_id=pk,
+                    return_to_cashier = ReturnToCashier.rejection_return_to_cashier(
+                        return_to_cashier_id=pk,
                         observation=serializer.validated_data['description'],
                         user=request.infoUser.get('id')
                     )
             except DatabaseError as e:
                 print(f"Database error during update: {e}")
-                expense_sheet = None
+                return_to_cashier = None
 
-            if expense_sheet:
-                expense_sheet = self.get_object()
+            if return_to_cashier:
+                return_to_cashier = self.get_object()
                 return Response(
-                    # expense_sheet.data,
-                    ExpenseSheetDetailSerializer(expense_sheet).data,
+                    # return_to_cashier.data,
+                    ReturnToCashierDetailSerializer(return_to_cashier).data,
                     status=status.HTTP_200_OK
                 )
             else:
@@ -295,16 +290,16 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
     def destroy(self, request, pk=None):
         """ Action pour supprimer une fiche de dépenses """
         print("ok delete")
-        expensesheet = self.get_object()
+        ReturnToCashier = self.get_object()
         user_qs = request.infoUser.get('id')
         print(f"{user_qs}")
-        # expensesheet.delete_expense_sheet(self, user=user_qs.first)
-        expensesheet.delete_expense_sheet(user=user_qs, expense_sheet_id = pk)
-        expensesheet = self.get_object()
+        # ReturnToCashier.delete_return_to_cashier(self, user=user_qs.first)
+        ReturnToCashier.delete_return_to_cashier(user=user_qs, return_to_cashier_id = pk)
+        ReturnToCashier = self.get_object()
         return Response(
-            ExpenseSheetDetailSerializer(
-                expensesheet,
-                context={"request": request, "expensesheet": expensesheet}
+            ReturnToCashierDetailSerializer(
+                ReturnToCashier,
+                context={"request": request, "ReturnToCashier": ReturnToCashier}
             ).data,
             status=status.HTTP_200_OK
         )
@@ -313,19 +308,21 @@ class ExpenseSheetViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def restore(self, request, pk=None, ):
         """ Action pour restorer une fiche de dépenses """
-        expensesheet = self.get_object()
+        ReturnToCashier = self.get_object()
         user_qs = request.infoUser.get('id')
         print(f"id user : {user_qs}")
-        print(f"id expensesheet : {pk}")
-        expensesheet.restore_expense_sheet(user=user_qs, expense_sheet_id = pk)
-        expensesheet = self.get_object()
+        print(f"id ReturnToCashier : {pk}")
+        ReturnToCashier.restore_return_to_cashier(user=user_qs, return_to_cashier_id = pk)
+        ReturnToCashier = self.get_object()
         return Response(
-            ExpenseSheetDetailSerializer(
-                expensesheet,
-                context={"request": request, "expensesheet": expensesheet}
+            ReturnToCashierDetailSerializer(
+                ReturnToCashier,
+                context={"request": request, "ReturnToCashier": ReturnToCashier}
             ).data,
             status=status.HTTP_200_OK
         )
 
 
    
+
+# Create your views here.

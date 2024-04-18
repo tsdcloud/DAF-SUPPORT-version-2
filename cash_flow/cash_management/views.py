@@ -13,6 +13,7 @@ import random
 from django.utils import timezone
 from datetime import timedelta
 from depenses.models import ExpenseSheet
+from return_to_cashier.models import ReturnToCashier
 
 from cash_management.models import CashTransaction
 from cash_management.serializers import (CashTransactionSerializer, CashTransactionCreateSerializer,
@@ -107,20 +108,56 @@ class CashTransactionViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """create an object"""
-        print("ok")
+        
         serializer = self.get_serializer(data=self.request.data)
         serializer.is_valid(raise_exception=True)
-        print(serializer.data['module'])
+        
+        
+        # def action_depense():
+        #     check = ExpenseSheet.check_expense_sheet(expense_sheet_id=serializer.validated_data['item_id'])
+        #     if not check:
+        #         return Response({"detail": "No expense sheet"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # def action_retour():
+        #     check = ReturnToCashier.check_return_to_cashier(return_to_cashier_id=serializer.validated_data['item_id'])
+        #     if not check:
+        #         return Response({"detail": "No return to cashier"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # def action_recette():
+        #     pass
+
+        # def action_approvisionnement_caisse():
+        #     pass
+
+        # def default():
+        #     return Response({"detail": "NO MODULE SELECTED"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # def switch_case_module(module):
+        #     switcher = {
+        #         'DEPENSE': action_depense,
+        #         'RETOUR CAISSE': action_retour,
+        #         'RECETTE': action_recette,
+        #         'APPROVISIONNEMENT CAISSE': action_approvisionnement_caisse
+        #     }
+        #     # Appel de la fonction appropriée en fonction de la valeur de module
+        #     return switcher.get(module, default)()
+        
+        # # Exécutez la fonction
+        # return switch_case_module(serializer.validated_data['module'])
+        
+
         
         if serializer.validated_data['module'] == 'DEPENSE':
                 check = ExpenseSheet.check_expense_sheet(expense_sheet_id=serializer.validated_data['item_id'])
                 if check == False:
                     return Response({"detail": f"No expense sheet"}, status=status.HTTP_400_BAD_REQUEST)
-        elif cash_transaction.module == 'RECETTE':
+        elif serializer.validated_data['module'] == 'RETOUR CAISSE':
+            check = ReturnToCashier.check_return_to_cashier(return_to_cashier_id=serializer.validated_data['item_id'])
+            if check == False:
+                return Response({"detail": f"No return to cashier"}, status=status.HTTP_400_BAD_REQUEST)
+        elif serializer.validated_data['module'] == 'RECETTE':
             pass
-        elif cash_transaction.module == 'RETOUR CAISSE':
-            pass
-        elif cash_transaction.module == 'APPROVISIONNEMENT CAISSE':
+        elif serializer.validated_data['module'] == 'APPROVISIONNEMENT CAISSE':
             pass
     
         if serializer.is_valid():

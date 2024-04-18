@@ -27,6 +27,7 @@ from django.conf import settings
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from depenses.views import ExpenseSheetViewSet
+from return_to_cashier.views import ReturnToCashierViewSet
 from cash_management.views import CashTransactionViewSet
 from articlemanagement.views import FamilyArticleViewSet, ArticleViewSet
 from availabilityrequest.views import AvailabilityRequestViewSet, WordingAvailabilityRequestViewSet
@@ -35,6 +36,7 @@ from availabilityrequest.views import AvailabilityRequestViewSet, WordingAvailab
 router = OptionalSlashRouter()
 
 router.register(r'expensesheet', ExpenseSheetViewSet, basename='expensesheet')
+router.register(r'returntocashier', ReturnToCashierViewSet, basename='returntocashier')
 router.register(r'cashtransaction', CashTransactionViewSet, basename='cashtransaction')
 router.register(r'familyarticle', FamilyArticleViewSet, basename='familyarticle')
 router.register(r'article', ArticleViewSet, basename='article')

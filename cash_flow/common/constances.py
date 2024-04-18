@@ -43,7 +43,7 @@ class PaymentMethods(Enum):
     VIREMENT = 'VIREMENT'
     CHEQUE = 'CHEQUE'
     PAIMENT_MOBILE = 'PAIMENT MOBILE'
-    CRYPTO_MONAIE = 'REJET ORDONNATEUR'
+    CRYPTO_MONAIE = 'CRYPTO MONAIE'
     PORTE_MONAIE_ELECTRONIQUE = 'PORTE MONAIE ELECTRONIQUE'
 
 
@@ -57,8 +57,9 @@ class StatutAvailabilityRequest(Enum):
     RECU = 'RECU'
 
 class StatutReturnToCashier(Enum):
-    VALIDATION_CAISSE = 'VALIDATION CAISSE'
-    RECU = 'RECU'
+    INITIE = 'INITIE'
+    EN_EXECUTION ='EN EXECUTION'
+    ARCHIVE ='EXECUTE'
 
 class TypeProduit(Enum):
     BIEN = 'BIEN'
